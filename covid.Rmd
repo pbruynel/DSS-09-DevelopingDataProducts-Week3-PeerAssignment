@@ -1,0 +1,69 @@
+---
+title: "Covid19 in the Netherlands"
+author: "Paul Bruynel"
+date: "June 18, 2021"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Summary
+This report is the assignment for the 3rd week of the course Developing Data Products on Coursera.  
+
+**Remarks on the review criteria**  
+I do not understand the point of the review criterium "Does the web page feature a date and is this date less than two months before the date that you're grading this assignment?"  
+To be on the safe side I add a date to this document that complies with this criterium: **January 1, 2021**
+  
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
+library(lubridate)
+url <- "https://data.rivm.nl/covid-19/COVID-19_aantallen_gemeente_cumulatief.csv"
+df <- read.csv2(url)
+df$Date_of_report <- as.Date(ymd_hms(df$Date_of_report))
+minDate <- min(df$Date_of_report)
+maxDate <- max(df$Date_of_report)
+```
+
+The plot on the next slide  shows the cumulative reported number of positively tested persons on Covid19 
+in the Netherlands as per province in the period from `r format(minDate, "%B %d, %Y")` until 
+`r format(maxDate, "%B %d, %Y")`.  
+Source: [RIVM Netherlands](https://data.rivm.nl/covid-19/)  
+Dataset: [COVID-19_aantallen_gemeente_cumulatief.csv](https://data.rivm.nl/covid-19/COVID-19_aantallen_gemeente_cumulatief.csv)
+
+## Results
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=5}
+# Loading the necessary libraries
+library(plotly)
+library(tidyr)
+library(dplyr)
+library(lubridate)
+
+url <- "https://data.rivm.nl/covid-19/COVID-19_aantallen_gemeente_cumulatief.csv"
+df <- read.csv2(url)
+#df <- read.csv2("COVID-19_aantallen_gemeente_cumulatief.csv")
+
+# Cleaning the data
+df$Date_of_report <- as.Date(ymd_hms(df$Date_of_report))
+# Replace Province Fryslân with Friesland; they are the same.
+df["Province"][df["Province"] == "Fryslân"] <- "Friesland"
+# Remove empty Provinces
+df <- df[df$Province!="",]
+
+df <- df %>%
+    select(c(Date_of_report, Province, Total_reported)) %>%
+    arrange(Date_of_report, Province, Total_reported) %>%
+    group_by(Date_of_report, Province) %>%
+    summarise(Total = sum(Total_reported))
+# You need to ungroup the dataframe in order be able to see lines in the plot_ly plot
+# https://stackoverflow.com/questions/46102483/r-plotly-invisible-lines
+df <- ungroup(df)
+fig <- plot_ly(df, x = ~Date_of_report, y = ~Total, color = ~Province, type = "scatter",
+               mode = "lines") %>% 
+    layout(xaxis = list(title="Date"), yaxis = list(title="Total Covid19 reports")) %>%
+    layout(title = "Covid19 in the Netherlands",
+           legend = list(title = list(text = "<b>Province</b>")))
+fig
+  
+```
+  

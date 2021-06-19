@@ -1,0 +1,133 @@
+---
+title: "MyPlotly"
+author: "Paul Bruynel"
+date: "6/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Basic Scatterplot
+A basic scatterplot is easy to make, with the added benefit of tooltips that
+appear when your mouse hovers over each point. Specify a scatterplot by
+indicating `type = "scatter"`. Notice that the arguments for the `x` and `y` 
+variables as specified as formulas, with the tilde operator (`~`) preceding the
+variable that you're plotting.  
+This is a scatterplot for the iris dataset:
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(plotly)
+data("iris")
+plot_ly(iris, x = ~Petal.Width, y = ~Petal.Length, type = "scatter")
+```
+
+## Added color
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+plot_ly(iris, x = ~Petal.Width, y = ~Petal.Length, type = "scatter", color = ~Species, size = ~Sepal.Length)
+plot_ly(iris, x = ~Sepal.Width, y = ~Sepal.Length, type = "scatter", color = ~Species, size = ~Petal.Length)
+```
+
+## 3D scatterplot
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+plot_ly(iris, x = ~Sepal.Length, y = ~Petal.Width, z = ~Petal.Length, type = "scatter3d", color = ~Species, size = ~Sepal.Width)
+```
+
+## Stockmarket
+Lineplots
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(plotly)
+library(tidyr)
+library(dplyr)
+data("EuStockMarkets")
+
+stocks <- as.data.frame(EuStockMarkets) %>%
+  gather(index, price) %>%
+  mutate(time = rep(time(EuStockMarkets), 4))
+
+plot_ly(stocks, x = ~time, y = ~price, color = ~index, type = "scatter", mode = "lines")
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(plotly)
+library(tidyr)
+library(dplyr)
+df <- read.csv2("COVID-19_aantallen_gemeente_cumulatief.csv")
+
+library(lubridate)
+df$Date_of_report <- as.Date(ymd_hms(df$Date_of_report))
+df$Province <- as.factor(df$Province)
+
+df <- df %>%
+    select(c(Date_of_report, Province, Total_reported)) %>%
+    arrange(Date_of_report, Province, Total_reported)
+df <- df %>%
+    group_by(Date_of_report, Province) %>%
+    summarise(Total = sum(Total_reported))
+
+plot_ly(df, x = ~Date_of_report, y = ~Total, color = ~Province, type = "scatter", mode = "lines")
+# df3 <- df[df$Province %in% c('Drenthe', 'Flevoland', 'Friesland', 'Gelderland', 'Groningen',                               'Limburg', 'Noord-Brabant', 'Noord-Holland', 'Overijssel') ,]
+df3 <- df[df$Province %in% c('Drenthe', 'Flevoland') ,]
+plot_ly(df3, x = ~Date_of_report, y = ~Total, color = ~Province, type = "scatter", mode = "lines")
+
+```
+
+
+## Histogram
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+plot_ly(iris, x = ~Sepal.Width, type = "histogram")
+```
+
+## Boxplot
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+plot_ly(iris, y = ~Petal.Length, type = "box", color = ~Species)
+```
+
+## Heatmap 2D
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+terrain1 <- matrix(rnorm(100*100), nrow=100, ncol=100)
+plot_ly(z = terrain1, type = "heatmap")
+```
+
+## Heatmap 3D (Surface)
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+terrain2 <- matrix(sort(rnorm(100*100)), nrow=100, ncol=100)
+plot_ly(z = terrain2, type = "surface")
+```
+
+## Choropleth Maps
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+# Create data frame
+state_pop <- data.frame(State = state.abb, Pop = as.vector(state.x77[,1]))
+# Create hover text
+state_pop$hover <- with(state_pop, paste(State, '<br>', "Population:", Pop))
+# Make state borders white
+borders <- list(color = toRGB("red"))
+# Set up some mapping options
+map_options <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
+
+plot_ly(z = ~state_pop$Pop, text = ~state_pop$hover, locations = ~state_pop$State, 
+        type = 'choropleth', locationmode = 'USA-states', 
+        color = state_pop$Pop, colors = 'Blues', marker = list(line = borders)) %>%
+  layout(title = 'US Population in 1975', geo = map_options)
+```
+
+## Make ggplot plots interactive - convert ggplot to plot_ly
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
+set.seed(100)
+d <- diamonds[sample(nrow(diamonds), 1000), ]
+
+p <- ggplot(data=d, aes(x=carat, y=price)) +
+  geom_point(aes(text=paste("Clarity:", clarity)), size=4) +
+  geom_smooth(aes(color=cut, fill=cut)) + facet_wrap(~cut)
+
+(gg <- ggplotly(p))
+
+```

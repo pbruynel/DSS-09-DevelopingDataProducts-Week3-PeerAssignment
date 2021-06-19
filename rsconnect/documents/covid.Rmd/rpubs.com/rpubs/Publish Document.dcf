@@ -1,0 +1,11 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/783153/2f621b38b07341e499db017aa1df8117
+bundleId: https://api.rpubs.com/api/v1/document/783153/2f621b38b07341e499db017aa1df8117
+url: http://rpubs.com/pbruynel/783153
+when: 1624058072.82026
+lastSyncTime: 1624058072.82027
