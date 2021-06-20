@@ -2,7 +2,9 @@
 title: "Covid19 in the Netherlands"
 author: "Paul Bruynel"
 date: "June 18, 2021"
-output: ioslides_presentation
+output: 
+  ioslides_presentation: 
+    keep_md: yes
 ---
 
 ```{r setup, include=FALSE}
