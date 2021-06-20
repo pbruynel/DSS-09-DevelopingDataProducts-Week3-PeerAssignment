@@ -1,7 +1,7 @@
 ---
 title: "Covid19 in the Netherlands"
 author: "Paul Bruynel"
-date: "June 18, 2021"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output: 
   ioslides_presentation: 
     keep_md: yes
@@ -9,6 +9,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(lubridate)
 ```
 
 ## Summary
@@ -19,7 +20,6 @@ I do not understand the point of the review criterium "Does the web page feature
 To be on the safe side I add a date to this document that complies with this criterium: **January 1, 2021**
   
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=10, fig.height=6}
-library(lubridate)
 url <- "https://data.rivm.nl/covid-19/COVID-19_aantallen_gemeente_cumulatief.csv"
 df <- read.csv2(url)
 df$Date_of_report <- as.Date(ymd_hms(df$Date_of_report))
@@ -68,4 +68,4 @@ fig <- plot_ly(df, x = ~Date_of_report, y = ~Total, color = ~Province, type = "s
 fig
   
 ```
-  
+
